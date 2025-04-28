@@ -1,0 +1,17 @@
+name: diabetes
+dir_name: raw # This reads data from "./databse/diabetes/{cfg.model.name}/raw"
+# dir_name: abc # This reads data from "./databse/diabetes/{cfg.model.name}/abc"
+
+metrics: # {f1, acc, auc, rmse, mae, r2, ...}
+  - mae
+  - rmse
+  - r2
+
+task_type: regression # {classification, regression}
+
+#################
+# preprocessing #
+#################
+use_pca: False
+pca_n_components: 0.95
+standardize_type: per_feature # {all, none, per_ch, per_feature}

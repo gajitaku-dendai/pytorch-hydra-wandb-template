@@ -1,0 +1,19 @@
+defaults:
+  - _self_
+  - model: mlp
+  - data: california_housing
+
+### for wandb ###
+use_wandb: True
+wandb_project_name: null
+# wandb_project_name: example
+
+### for kfold ###
+use_kfold: True
+kfold_n_splits: 5
+now_fold: null # don't change this, it will be set automatically
+
+### automatic ###
+output_dir: null # don't change this, it will be set automatically
+note: null # you can add a note as 'output_dir/{note}.txt'
+# note: 'for comparison with baseline'
