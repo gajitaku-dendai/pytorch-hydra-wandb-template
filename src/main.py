@@ -178,7 +178,7 @@ def main(cfg: MyConfig) -> None:
 
     # --- プロジェクト名を作成or取得 ---
     if cfg.wandb_project_name is None:
-        project_name = f"{cfg.model.name}.{cfg.model.input_type}.{cfg.data.dir_name}"
+        project_name = f"{cfg.model.name}.{cfg.data.name}.{cfg.data.dir_name}"
     else:
         project_name = cfg.wandb_project_name
 
