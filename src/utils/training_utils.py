@@ -167,6 +167,8 @@ class EarlyStopping:
                 self.early_stop = True
 
     def _save_checkpoint(self, score, model):
+        if self.best_score is None:
+            self.best_score = score
         if self.verbose:
             print(f'{self.metric} improved ({self.best_score:.5f} -> {score:.5f}). Saving model ...')
         torch.save(model.state_dict(), self.path)

@@ -5,8 +5,8 @@ pretrained_path: null # (e.g., "src/models/xxx.pth")
 #################
 #   parameters  #
 #################
-epochs: 50
-early: 50
+epochs: 10
+early: 10
 learning_rate: 1e-2
 l2_rate: 0
 batch_size: 32
