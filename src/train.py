@@ -6,8 +6,8 @@ from tqdm import tqdm
 import wandb
 
 
-from utils import *
-from trainer import *
+from utils import EarlyStopping, History, get_scheduler
+from trainer import Trainer
 from conf.config import MyConfig
 
 def train(cfg: MyConfig,
@@ -19,6 +19,40 @@ def train(cfg: MyConfig,
           valid_loader: DataLoader,
           test_loader: DataLoader,
           now_fold: int) -> nn.Module:
+    """
+    モデルの学習を行う関数．
+    学習用データに対して学習を行い，検証用データとテスト用データに対して評価を行う．
+    学習率スケジューラーを使用して，学習率を調整する．
+    Early Stoppingを使用して，過学習を防ぐ+最良モデルの保存．
+
+    Parameters
+    ----------
+    cfg : MyConfig
+        型ヒントとしてMyConfigを使っているHydraの構成オブジェクト．
+        実際はDictDotNotation型 or DictConfig型．
+    device : torch.device
+        使用するデバイス（GPU or CPU）．
+    model : nn.Module
+        学習するモデル．
+    optimizer : optim.Optimizer
+        最適化関数．
+    criterion : nn.Module
+        損失関数．
+    train_loader : DataLoader
+        学習用データローダー．
+    valid_loader : DataLoader
+        検証用データローダー．
+    test_loader : DataLoader
+        テスト用データローダー．
+    now_fold : int
+        交差検証のfold番号．
+        交差検証を使わない場合は0．
+
+    Returns
+    -------
+    model : nn.Module
+        学習したモデル．
+    """
     
     # --- Early stopping ---
     monitor = cfg.model.monitor
@@ -35,7 +69,7 @@ def train(cfg: MyConfig,
         early_stopping = EarlyStopping(path=f"{cfg.output_dir}/best.pth", patience=cfg.model.early, verbose=True,
                                        metric=scheduler_metric)
     
-    # --- 学習バッチ処理させるクラス ---
+    # --- 1epochの学習バッチ処理させるクラス ---
     trainer = Trainer(device, model, criterion, optimizer, cfg)
 
     # --- 評価指標のヒストリー ---
@@ -107,16 +141,16 @@ def train(cfg: MyConfig,
             })
             wandb.log(log_dict, step=step)
         
-        if epoch == 0:
+        # --- 定期的なモデルの保存 ---
+        if (epoch == 0) or ((epoch + 1) % 10 == 0):
             torch.save(model.state_dict(), f"{cfg.output_dir}/last.pth")
 
-        if (epoch + 1) % 10 == 0:
-            torch.save(model.state_dict(), f"{cfg.output_dir}/last.pth")
-
+        # --- Early Stoppingフラグ ---
         if early_stopping.early_stop:
             print("Early Stopping!")
             break
-        
+
+        # --- 学習率スケジューラー更新 ---
         if sch_type == "torch":
             scheduler.step()
         elif sch_type == "timm":

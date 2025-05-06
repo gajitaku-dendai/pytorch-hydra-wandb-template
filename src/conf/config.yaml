@@ -1,12 +1,19 @@
+# Hydraでは，段階的にconfigを設定できる．
+# conf/config.yamlを一層目とすると，
+# conf/data/**.yamlや，conf/model/**.yamlは二層目となる．
+# 二層目に何を使うかは，以下のdefaultsに - {ディレクトリ名}: {ファイル名（使いたいyamlフィアル）} で指定する．
 defaults:
   - _self_
-  - model: mlp
-  - data: california_housing
+  - model: mlp # {mlp, cnn, ...}
+  - data: california_housing # {diabetes, california_housing, mnist, ...}
 
 ### for wandb ###
 use_wandb: True
 wandb_project_name: null
 # wandb_project_name: example
+use_sweep: False
+sweep_id: ""
+sweep_name: null
 
 ### for kfold ###
 use_kfold: True

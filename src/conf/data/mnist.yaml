@@ -1,17 +1,17 @@
-name: diabetes
+name: mnist
 dir_name: raw # This reads data from "./databse/diabetes/{cfg.model.name}/raw"
 # dir_name: abc # This reads data from "./databse/diabetes/{cfg.model.name}/abc"
 
 # ここで，評価指標を指定する．最低1つは必要．
-# f1, acc, auc, rmse, mae, r2 以外に追加したい場合，training_utils.pyのcalc_scores関数を修正すること．
-metrics: # {f1, acc, auc, rmse, mae, r2, ...}
-  - mae
-  - rmse
-  - r2
-calc_cm: False # confusion matrixを計算するかどうか．regressionの場合はFalseにすること．
+# f1, acc, auc, rmse, mae, r2, 以外に追加したい場合，training_utils.pyのcalc_scores関数を修正すること．
+metrics: # {f1, acc, auc, rmse, mae, r2, }
+  - acc
+  - f1
+calc_cm: True # confusion matrixを計算するかどうか．
+class_names: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"] # confusion matrixの表示に使う．nullの場合は，インデックスをそのまま表示する．
 
 # 回帰 or 分類を指定する．
-task_type: regression # {classification, regression}
+task_type: classification # {classification, regression}
 
 #################
 # preprocessing #
@@ -21,4 +21,4 @@ task_type: regression # {classification, regression}
 # 追加した変数を用いて，database/**/**_dataset.pyの中で処理を追加してください．
 use_pca: False
 pca_n_components: 0.95
-standardize_type: per_feature # {all, none, per_ch, per_feature}
+standardize_type: all # {all, none, per_ch, per_feature}
