@@ -124,25 +124,25 @@ poetry run python src/main.py
 
 ## 使い方
 
-すべてのファイルにコメントを記述済み！
-main.pyをまず参照し、どんな順番で実行されていくか隅々まで読んで理解して、使い倒してください！
+すべてのファイルにコメントを記述済み！  
+main.pyをまず参照し、どんな順番で実行されていくか隅々まで読んで理解して、使い倒してください！  
 
-📦 すぐに試せるよう、サンプルのデータセットとモデルクラスも用意済みです！
-（src/database/ と src/architecture/ をご参照ください）
-databse/**/load_data.ipynbを実行すると、データがロードされます。
+📦 すぐに試せるよう、サンプルのデータセットとモデルクラスも用意済みです！  
+（src/database/ と src/architecture/ をご参照ください）  
+databse/**/load_data.ipynbを実行すると、データがロードされます。  
 
-📌 現在「使い方」は随時更新中で
-📌 解説サイトも作成中のため，しばしお待ちください！
-📌 The English version is currently under construction.
+📌 現在「使い方」は随時更新中です！  
+📌 解説サイトも作成中のため，しばしお待ちください！  
+📌 The English version is currently under construction.  
 
 ---
 
 ## ライセンス 📄
 
 このリポジトリは MIT ライセンスのもとで公開されています。  
-ご自由にご利用・改変・再配布いただけますが、再利用時は著作権表示を残してください。
+ご自由にご利用・改変・再配布いただけますが、再利用時は著作権表示を残してください。  
 
-詳しくは [LICENSE](./LICENSE) ファイルをご確認ください。
+詳しくは [LICENSE](./LICENSE) ファイルをご確認ください。  
 
 ---
 
