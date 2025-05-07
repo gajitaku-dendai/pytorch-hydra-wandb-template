@@ -84,6 +84,30 @@ def print_dataset_details(cfg: MyConfig, train_dataset: Dataset, valid_dataset: 
     print("data_shape (except num_sample):", train_dataset[0][0].shape)
 
 def dataset_to_dataloader(dataset, batch_size, isValid=False, isTest=False):
+    """
+    データセットをDataLoaderに変換する関数．
+    
+    Parameters
+    ----------
+    dataset : Dataset
+        データセット．
+    batch_size : int
+        バッチサイズ．
+    isValid : bool, optional
+        検証用データセットの場合はTrue, by default False
+    isTest : bool, optional
+        テスト用データセットの場合はTrue, by default False
+    
+    Returns
+    -------
+    DataLoader
+        データローダー．
+    
+    Notes
+    -----
+    num_workersは2に設定している．
+    注意：Windowsではnum_workers=0にしないと超絶学習が遅くなる．
+    """
     g = torch.Generator()
     g.manual_seed(42)
     if isValid or isTest:

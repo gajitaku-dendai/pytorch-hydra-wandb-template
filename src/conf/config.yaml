@@ -4,7 +4,7 @@
 # 二層目に何を使うかは，以下のdefaultsに - {ディレクトリ名}: {ファイル名（使いたいyamlフィアル）} で指定する．
 defaults:
   - _self_
-  - model: mlp # {mlp, cnn, ...}
+  - model: mlp # {mlp, cnn_2d, ...}
   - data: california_housing # {diabetes, california_housing, mnist, ...}
 
 ### for wandb ###

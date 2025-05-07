@@ -1,19 +1,48 @@
-method: "bayes"
+# W&BのSweepとは，ハイパーパラメーターチューニングを自動で行うための機能です．
+# これを使うことで，指定したハイパーパラメータの範囲を探索し，最適な組み合わせを見つけることができます．
+# 具体的には，以下のような手順で動作します．
+# 1. スクリプトを実行する
+# 2. 指定されたハイパーパラメータの範囲をもとに，W&Bが自動的に組み合わせを生成します．
+# 3. 各組み合わせに対して，指定された評価指標（例えば，精度や損失）を計算します．
+# 4. 最も良い結果を出した組み合わせを報告します．
+# 5. 最適なハイパーパラメータを見つけるために，必要に応じて探索を繰り返します．
+#
+# これにより，手動でハイパーパラメータを調整する手間が省け，効率的にモデルの性能を向上させることができます．
+# 詳細は https://docs.wandb.ai/ja/guides/sweeps/sweep-config-keys/#method を御覧ください
+
+# bayes: ベイズ最適化で探索（良さそうな範囲を中心に探索）．
+# random: ランダムに探索．
+# grid: グリッドサーチを使用して”すべての組み合わせで”探索（これを指定するときは，パラメータの範囲が離散であること）．
+method: "bayes" # {random, bayes, grid}
 metric:
+  # ここで，最適化の基準となる指標を指定．”{mode}_{metric}_mean”
+  # mode: {train, valid, test}, metric: {loss, acc, f1, auc, rmse, ...}　<-- これらは，data/**.yamlで指定した中から必ず選ぶ
+  # goalは，その指標を最大化したいか最小化したいかを指定．
   name: "valid_r2_mean"
   goal: "maximize"
+
+# ここで，探索するパラメータを指定．
+# ここで，指定していないパラメータは，Hydraのyamlで指定した値が使われる．
+# Hydraで階層構造のyamlを使っている場合，parametersの下に，modelやdataなど二層目のフォルダ名を指定する．
+# 離散値を探索する場合は"values"
+# 連続値を探索する場合は"distribution"と"min","max"を指定する．詳細は上記のリンクを参照．
 parameters:
   model:
     parameters:
-      # learning_rate:
-      #   distribution: "log_uniform_values"
-      #   min: 0.00001
-      #   max: 0.1
-      # l2_rate:
-      #   distribution: "log_uniform_values"
-      #   min: 0
-      #   max: 0.01
+      learning_rate:
+        distribution: "log_uniform_values"
+        min: 1e-6
+        max: 1e-1
+      # learning_rateの探索を他のパラメータと同時にするときは，schedulerオフ推奨．（lr_minとかwarmupとかゴチャゴチャになるから．）
+      # もしschedulerを使う場合は，lr_minとの整合性を考慮して使うか，工夫した変数を設定すること（lr_minをlearning_rateの割合で指定するなど）．
+      # 探索をせずに，ある値で固定したい場合は，"value"としておく．
+      scheduler:
+        value: null
+      l2_rate:
+        distribution: "log_uniform_values"
+        min: 1e-5
+        max: 1e-2
       batch_size:
-        values: [8, 16, 32, 64]
+        values: [32, 64, 128, 256]
       use_noise:
         values: [True, False]

@@ -124,6 +124,9 @@ def get_criterion(cfg: MyConfig, counts, device) -> nn.Module:
     elif cfg.model.criterion == "MSE":
         return nn.MSELoss()
     
+    else:
+        raise ValueError(f"Criterion {cfg.model.criterion} is not defined.")
+    
 def get_optimizer(cfg: MyConfig, model: nn.Module) -> optim.Optimizer:
     """
     最適化関数を取得する関数．
@@ -174,6 +177,9 @@ def get_optimizer(cfg: MyConfig, model: nn.Module) -> optim.Optimizer:
             lr=cfg.model.learning_rate,         
             weight_decay=cfg.model.l2_rate)
     
+    else:
+        raise ValueError(f"Optimizer {cfg.model.optimizer} is not defined.")
+    
 def get_scheduler(optimizer: optim.Optimizer, cfg: MyConfig) -> tuple[optim.lr_scheduler._LRScheduler, str]:
     """
     学習率スケジューラを取得する関数．
@@ -212,6 +218,9 @@ def get_scheduler(optimizer: optim.Optimizer, cfg: MyConfig) -> tuple[optim.lr_s
                                   warmup_t=cfg.model.warmup_t,
                                   warmup_lr_init=cfg.model.lr_min,
                                   warmup_prefix=True), "timm"
+
+    else:
+        raise ValueError(f"Scheduler {cfg.model.scheduler} is not defined.")
 
 def calc_loss_pred_y(cfg: MyConfig, output: torch.Tensor, y: torch.Tensor, criterion: nn.Module,
                      device: torch.device) -> tuple[torch.Tensor, np.ndarray]:
@@ -302,6 +311,9 @@ def calc_scores(y: np.ndarray, pred_y: np.ndarray, metric_names: list[str], calc
                 metrics.append(root_mean_squared_error(y, pred_y))
             elif name == "mse":
                 metrics.append(mean_squared_error(y, pred_y))
+            
+            else:
+                raise ValueError(f"Metric {name} is not defined.")
         if calc_cm:
             # 混同行列を計算する場合は必ず最後に追加する．後にmetrcis[-1]で参照しているため
             metrics.append(confusion_matrix(y, pred_y))
