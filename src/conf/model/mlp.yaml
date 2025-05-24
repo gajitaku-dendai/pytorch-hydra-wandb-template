@@ -1,19 +1,19 @@
 name: mlp
 
-# ここで，データセットの入力形式を指定する．
-# 例えば音声認識の場合，同一データセットでも，前処理によっては，
-# 画像(img)として扱う場合と，音声信号(signal)として扱う場合がある．
-# その場合，データセットのディレクトリは同じでも，入力形式は異なるため，
-# ここで指定して，dataset.pyの中で処理を分けられます．
+# ここで、データセットの入力形式を指定する。
+# 例えば音声認識の場合、同一データセットでも、前処理によっては、
+# 画像(img)として扱う場合と、音声信号(signal)として扱う場合がある。
+# その場合、データセットのディレクトリは同じでも、入力形式は異なるため、
+# ここで指定して、dataset.pyの中で処理を分けられます。
 input_type: features # (e.g., features, text, image)
 
-input_type: img # (e.g., features, text, img, signal, ...)
+# 学習済みモデルを使いたいなら、ここでパスを指定。
 pretrained_path: null # (e.g., "src/models/xxx.pth")
 
 #################
 #   parameters  #
 #################
-# ここで，モデルのパラメータを指定する．
+# ここで、モデルのパラメータを指定する。
 epochs: 10
 early: 10
 learning_rate: 1e-2
@@ -21,19 +21,20 @@ l2_rate: 0
 batch_size: 32
 test_batch_size: 256
 
-# ここで，最適化関数を指定する．
-# 追加する場合，training_utils.pyのget_optimizer関数を修正すること．
+# ここで、最適化関数を指定する。
+# 追加する場合、training_utils.pyのget_optimizer関数を修正すること。
 optimizer: RAdam # {Adam, AdamW, RAdam, SGD, ...}
 
-# ここで，損失関数を指定する．
-# 追加する場合，training_utils.pyのget_criterion関数を修正すること．
+# ここで、損失関数を指定する。
+# 追加する場合、training_utils.pyのget_criterion関数を修正すること。
 criterion: MSE # {MAE, MSE, BinaryCrossEntropy, CrossEntropyLoss, ...}
-# ここで，損失関数にクラスごとに均衡になるような重みをつけるか指定．（分類問題のみ）
+# ここで、損失関数にクラスごとに均衡になるような重みをつけるか指定。（分類問題のみ）
 use_weighted_loss: False
 
-# ここで，最終的な評価に用いるモデルを指定する．
-# last: 最後のエポックのモデル，valid_best: 検証データでの最良モデル，test_best: テストデータでの最良モデル
-# monitor: 何を基準に最良を決定するか．
+# ここで、最終的な評価に用いるモデルを指定する。
+# last: 最後のエポックのモデル、valid_best: 検証データでの最良モデル、test_best: テストデータでの最良モデル
+# 検証とテストが無い場合は、lastを指定すること。
+# monitor: 何を基準に最良を決定するか。
 which_model: "test_best" # {last, valid_best, test_best}
 monitor: "loss" # {loss, acc, f1, auc, rmse, ...}
 
@@ -42,12 +43,12 @@ output_size: 1 # (# of classes for classification, 1 for regression)
 #################
 #   scheduler   #
 #################
-# ここで，スケジューラを指定する．
-# 自由に追加してください．
-# 基本は，timmかtorchのスケジューラを使うこと．
-# 追加した変数を用いて，training_utils.pyのget_scheduler関数で処理を追加してください．
+# ここで、スケジューラを指定する。
+# 自由に追加してください。
+# 基本は、timmかtorchのスケジューラを使うこと。
+# 追加した変数を用いて、training_utils.pyのget_scheduler関数で処理を追加してください。
 scheduler: "CosineLRScheduler" #timm
-lr_min: 1e-6
+lr_min: 1e-3
 warmup_t: 3
 
 # scheduler: "CosineAnnealingLR" #torch
@@ -60,9 +61,9 @@ warmup_t: 3
 #################
 #  augmentation #
 #################
-# ここで，データ拡張を指定する．
-# 自由に追加してください．
-# 追加した変数を用いて，database/**/**_dataset.pyのTrainDataset中で処理を追加してください．
+# ここで、データ拡張を指定する。
+# 自由に追加してください。
+# 追加した変数を用いて、database/**/**_dataset.pyのTrainDataset中で処理を追加してください。
 use_noise: True
 
 

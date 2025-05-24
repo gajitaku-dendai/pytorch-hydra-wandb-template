@@ -1,24 +1,54 @@
 name: california_housing
-dir_name: raw # This reads data from "./databse/california_housing/{cfg.model.name}/raw"
-# dir_name: abc # This reads data from "./databse/california_housing/{cfg.model.name}/abc"
 
-# ここで，評価指標を指定する．最低1つは必要．
-# f1, acc, auc, rmse, mae, r2 以外に追加したい場合，training_utils.pyのcalc_scores関数を修正すること．
+# データが保存されている場所を指定する。
+# データの保存場所は、src/database/{model.name}/以下にすること。
+dir_name: features/raw
+
+# ここで、評価指標を指定する。最低1つは必要。
+# f1, acc, auc, rmse, mae, r2 以外に追加したい場合、training_utils.pyのcalc_scores関数を修正すること。
 metrics: # {f1, acc, auc, rmse, mae, r2, ...}
   - mae
   - rmse
   - r2
-calc_cm: False # confusion matrixを計算するかどうか．regressionの場合はFalseにすること．
+calc_cm: False # confusion matrixを計算するかどうか。regressionの場合はFalseにすること。
 
-# 回帰 or 分類を指定する．
+# 回帰 or 分類を指定する。
 task_type: regression # {classification, regression}
+
+### データの分割 ###
+## 交差検証をするかどうか
+## 交差検証をする場合は、use_kfoldをTrueにして、kfold_n_splitsで分割数を指定する
+## now_foldは自動で定義されるので、null（現在処理中のfold番号が入る）
+use_kfold: True
+kfold_n_splits: 5
+now_fold: null
+
+# 交差検証を使うときは、以下の変数を使う。
+# 学習と検証に使うデータ全体の何割を「検証用データ」に割り当てるか決める。
+# 例えば、fold数が5の場合で、fold 0をテストデータとして使うときは、
+# fold 0のデータを除いたデータ (fold 1-4) のうち、kfold_valid_ratioの割合を検証用データとして使う。
+# 例えば、kfold_valid_ratioが0.25の場合、fold 1-4のデータのうち、25%を検証用データとして使う。
+# つまり、全体のデータで考えると、学習(fold 1-4 の 75 %):検証(fold 1-4 の 25 %):テスト(fold 0)
+# = 60%:20%:20% となる。
+kfold_valid_ratio: 0.25 # {0.0 ~}
+
+# --- データスプリット設定 ---
+# 1. 交差検証を使う場合
+#    kfold_valid_ratioが0.0の場合は、[train, test]のように指定すること。
+#    kfold_valid_ratio!=0.0の場合は、[train, valid, test]のように指定すること。
+# 2. 交差検証を使わない場合
+#    学習と検証とテストデータが存在する場合: [train, valid, test]
+#    学習と検証データが存在する場合: [train, valid]
+#    学習とテストデータが存在する場合: [train, test]
+#    学習データのみの場合: [train]
+data_splits: [train, valid, test] # {train, valid, test}
 
 #################
 # preprocessing #
 #################
-# ここで，前処理を指定する．
-# 自由に追加してください．
-# 追加した変数を用いて，database/**/**_dataset.pyの中で処理を追加してください．
+# ここで、前処理を指定する。
+# 自由に追加してください。
+# 追加した変数を用いて、database/**/**_dataset.pyの中で処理を追加してください。
 use_pca: False
 pca_n_components: 0.95
 standardize_type: per_feature # {all, none, per_ch, per_feature}

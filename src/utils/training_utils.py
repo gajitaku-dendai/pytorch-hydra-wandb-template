@@ -14,33 +14,33 @@ from architecture import get_model
 
 def load_model(cfg: MyConfig, device: torch.device, train_loader: DataLoader) -> tuple[nn.Module, Optimizer, nn.Module]:
     """
-    モデルと最適化関数，損失関数を読み込む関数．
-    cfg.model.nameに応じてモデル，cfg.model.optimizerに応じて最適化関数，cfg.model.criterionに応じて損失関数を設定する．
+    モデルと最適化関数、損失関数を読み込む関数。
+    cfg.model.nameに応じてモデル、cfg.model.optimizerに応じて最適化関数、cfg.model.criterionに応じて損失関数を設定する。
 
     Parameters
     ----------
     cfg : MyConfig
-        型ヒントとしてMyConfigを使っているHydraの構成オブジェクト．
-        実際はDictDotNotation型 or DictConfig型．
+        型ヒントとしてMyConfigを使っているHydraの構成オブジェクト。
+        実際はDictDotNotation型 or DictConfig型。
     device : torch.device
-        使用するデバイス（GPU or CPU）．
+        使用するデバイス（GPU or CPU）。
     train_loader : DataLoader
-        学習用データローダー．
+        学習用データローダー。
 
     Returns
     -------
     model : nn.Module
-        学習するモデル．
+        学習するモデル。
     optimizer : Optimizer
-        最適化関数．
+        最適化関数。
     criterion : nn.Module
-        損失関数．
+        損失関数。
 
     See Also
     --------
-    get_model : モデルを取得する関数．(architecture/__init__.py)
-    get_optimizer : 最適化関数を取得する関数．(utils/training_utils.py)
-    get_criterion : 損失関数を取得する関数．(utils/training_utils.py)
+    get_model : モデルを取得する関数。(architecture/__init__.py)
+    get_optimizer : 最適化関数を取得する関数。(utils/training_utils.py)
+    get_criterion : 損失関数を取得する関数。(utils/training_utils.py)
     """
     print("loading model...")
     model = get_model(cfg).to(device)
@@ -56,58 +56,62 @@ def load_model(cfg: MyConfig, device: torch.device, train_loader: DataLoader) ->
 
 def save_model(cfg: MyConfig, fold: int, model: nn.Module) -> nn.Module:
     """
-    モデルを保存する関数．
-    交差検証の場合，foldごとにベストモデルと最終エポックモデルを保存する．
+    モデルを保存する関数。
+    交差検証の場合、foldごとにベストモデルと最終エポックモデルを保存する。
 
     Parameters
     ----------
     cfg : MyConfig
-        型ヒントとしてMyConfigを使っているHydraの構成オブジェクト．
-        実際はDictDotNotation型 or DictConfig型．
+        型ヒントとしてMyConfigを使っているHydraの構成オブジェクト。
+        実際はDictDotNotation型 or DictConfig型。
     fold : int
-        交差検証のfold番号．
-        交差検証を使わない場合は0．
+        交差検証のfold番号。
+        交差検証を使わない場合は0。
     model : nn.Module
-        学習したモデル．
+        学習したモデル。
     
     Returns
     -------
     model : nn.Module
-        学習したモデル（cfg.model.which_modelで指定した段階のモデル）．
+        学習したモデル（cfg.model.which_modelで指定した段階のモデル）。
     """
-    os.rename(f"{cfg.output_dir}/best.pth", f"{cfg.output_dir}/best_{fold}.pth")
+    best_model_path = f"{cfg.output_dir}/best.pth"
+    best_model_fold_path = f"{cfg.output_dir}/best_{fold}.pth"
+    best_exists = os.path.exists(best_model_path)
+    if best_exists:
+        os.rename(best_model_path, best_model_fold_path)
     os.rename(f"{cfg.output_dir}/last.pth", f"{cfg.output_dir}/last_{fold}.pth")
-    if cfg.model.which_model != "last":
+    if cfg.model.which_model != "last" and best_exists:
         model.load_state_dict(torch.load(f'{cfg.output_dir}/best_{fold}.pth', weights_only=True))
     return model
 
 def get_criterion(cfg: MyConfig, counts, device) -> nn.Module:
     """
-    損失関数を取得する関数．
-    cfg.model.criterionに応じて損失関数を設定する．
-    cfg.model.use_weighted_lossがTrueの場合は，重み付き損失関数を設定する（分類問題のみ）．
+    損失関数を取得する関数。
+    cfg.model.criterionに応じて損失関数を設定する。
+    cfg.model.use_weighted_lossがTrueの場合は、重み付き損失関数を設定する（分類問題のみ）。
     
     Parameters
     ----------
     cfg : MyConfig
-        型ヒントとしてMyConfigを使っているHydraの構成オブジェクト．
-        実際はDictDotNotation型 or DictConfig型．
+        型ヒントとしてMyConfigを使っているHydraの構成オブジェクト。
+        実際はDictDotNotation型 or DictConfig型。
     counts : np.ndarray
-        クラス分布（分類問題の場合）．
-        0番目の要素がクラス0のサンプル数，1番目の要素がクラス1のサンプル数，...
+        クラス分布（分類問題の場合）。
+        0番目の要素がクラス0のサンプル数、1番目の要素がクラス1のサンプル数、...
     
     Returns
     -------
     criterion : nn.Module
-        損失関数．
-        cfg.model.criterionに応じた損失関数が設定される．
+        損失関数。
+        cfg.model.criterionに応じた損失関数が設定される。
     
     Notes
     -----
-    新たに損失関数を追加する場合は，この関数に追加する．
+    新たに損失関数を追加する場合は、この関数に追加する。
     elif cfg.model.criterion == "損失関数"
         return {損失関数クラス}
-    のように追加する．
+    のように追加する。
     """
     if cfg.model.criterion == "CrossEntropy":
         if cfg.model.use_weighted_loss:
@@ -129,29 +133,29 @@ def get_criterion(cfg: MyConfig, counts, device) -> nn.Module:
     
 def get_optimizer(cfg: MyConfig, model: nn.Module) -> optim.Optimizer:
     """
-    最適化関数を取得する関数．
-    cfg.model.optimizerに応じて最適化関数を設定する．
+    最適化関数を取得する関数。
+    cfg.model.optimizerに応じて最適化関数を設定する。
 
     Parameters
     ----------
     cfg : MyConfig
-        型ヒントとしてMyConfigを使っているHydraの構成オブジェクト．
-        実際はDictDotNotation型 or DictConfig型．
+        型ヒントとしてMyConfigを使っているHydraの構成オブジェクト。
+        実際はDictDotNotation型 or DictConfig型。
     model : nn.Module
-        学習するモデル．
+        学習するモデル。
     
     Returns
     -------
     optimizer : Optimizer
-        最適化関数．
-        cfg.model.optimizerに応じた最適化関数が設定される．
+        最適化関数。
+        cfg.model.optimizerに応じた最適化関数が設定される。
     
     Notes
     -----
-    新たに最適化関数を追加する場合は，この関数に追加する．
+    新たに最適化関数を追加する場合は、この関数に追加する。
     elif cfg.model.optimizer == "最適化関数"
         return {最適化関数クラス}
-    のように追加する．
+    のように追加する。
     """
     if cfg.model.optimizer == "Adam":
         return optim.Adam(
@@ -182,32 +186,32 @@ def get_optimizer(cfg: MyConfig, model: nn.Module) -> optim.Optimizer:
     
 def get_scheduler(optimizer: optim.Optimizer, cfg: MyConfig) -> tuple[optim.lr_scheduler._LRScheduler, str]:
     """
-    学習率スケジューラを取得する関数．
-    cfg.model.schedulerに応じて学習率スケジューラを設定する．
+    学習率スケジューラを取得する関数。
+    cfg.model.schedulerに応じて学習率スケジューラを設定する。
 
     Parameters
     ----------
     optimizer : Optimizer
-        最適化関数．
+        最適化関数。
     cfg : MyConfig
-        型ヒントとしてMyConfigを使っているHydraの構成オブジェクト．
-        実際はDictDotNotation型 or DictConfig型．
+        型ヒントとしてMyConfigを使っているHydraの構成オブジェクト。
+        実際はDictDotNotation型 or DictConfig型。
 
     Returns
     -------
     scheduler : _LRScheduler
-        学習率スケジューラ．
-        cfg.model.schedulerに応じた学習率スケジューラが設定される．
+        学習率スケジューラ。
+        cfg.model.schedulerに応じた学習率スケジューラが設定される。
     scheduler_type : str
-        学習率スケジューラのタイプ．PyTorchのスケジューラは"torch"，timmのスケジューラは"timm"．
+        学習率スケジューラのタイプ。PyTorchのスケジューラは"torch"、timmのスケジューラは"timm"。
     
     Notes
     -----
-    新たに学習率スケジューラを追加する場合は，この関数に追加する．
+    新たに学習率スケジューラを追加する場合は、この関数に追加する。
     elif cfg.model.scheduler == "学習率スケジューラ"
         return {学習率スケジューラクラス}, "torch" or "timm"
-    のように追加する．
-    また，必要な場合はcfg.modelにパラメータ管理用変数を追加してください．
+    のように追加する。
+    また、必要な場合はcfg.modelにパラメータ管理用変数を追加してください。
     """
     if cfg.model.scheduler == "CosineAnnealingLR":
         return optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=cfg.model.scheduler_cycle, eta_min=cfg.model.lr_min), "torch"
@@ -225,29 +229,29 @@ def get_scheduler(optimizer: optim.Optimizer, cfg: MyConfig) -> tuple[optim.lr_s
 def calc_loss_pred_y(cfg: MyConfig, output: torch.Tensor, y: torch.Tensor, criterion: nn.Module,
                      device: torch.device) -> tuple[torch.Tensor, np.ndarray]:
     """
-    損失と予測値を計算する関数．
+    損失と予測値を計算する関数。
 
     Parameters
     ----------
     cfg : MyConfig
-        型ヒントとしてMyConfigを使っているHydraの構成オブジェクト．
-        実際はDictDotNotation型 or DictConfig型．
+        型ヒントとしてMyConfigを使っているHydraの構成オブジェクト。
+        実際はDictDotNotation型 or DictConfig型。
     output : torch.Tensor
-        モデルの出力．
+        モデルの出力。
     y : torch.Tensor
-        正解値．
+        正解値。
     criterion : nn.Module
-        損失関数．
+        損失関数。
     device : torch.device
-        使用するデバイス（GPU or CPU）．
+        使用するデバイス（GPU or CPU）。
     
     Returns
     -------
     loss : torch.Tensor
-        損失値．
+        損失値。
     pred_y : np.ndarray
-        予測値．
-        cfg.data.task_typeに応じて，分類問題の場合はクラスラベル，回帰問題の場合は数値が格納される．
+        予測値。
+        cfg.data.task_typeに応じて、分類問題の場合はクラスラベル、回帰問題の場合は数値が格納される。
     """
     loss = criterion(output, y)
     with torch.no_grad():
@@ -255,8 +259,8 @@ def calc_loss_pred_y(cfg: MyConfig, output: torch.Tensor, y: torch.Tensor, crite
         output_np = output_cpu.detach().numpy()
         if cfg.data.task_type == "classification":
             if cfg.model.output_size == 1:
-                # BCEWithLogitsLossを使う場合，モデル出力はSigmoidを通していないlogits．
-                # Sigmoid関数は0で0.5なので，logitsが正なら1，負なら0と解釈できる．
+                # BCEWithLogitsLossを使う場合、モデル出力はSigmoidを通していないlogits。
+                # Sigmoid関数は0で0.5なので、logitsが正なら1、負なら0と解釈できる。
                 pred_y = np.where((output_np >= 0.0), 1, 0)
             else:
                 pred_y = np.argmax(output_np, axis=1)
@@ -267,32 +271,32 @@ def calc_loss_pred_y(cfg: MyConfig, output: torch.Tensor, y: torch.Tensor, crite
     
 def calc_scores(y: np.ndarray, pred_y: np.ndarray, metric_names: list[str], calc_cm: bool=False) -> list[any]:
     """
-    評価指標を計算する関数．
-    metric_namesに応じて，accuracy, f1, confusion_matrix, mae, r2, rmse, mseを計算する．
-    calc_cmがTrueの場合は混同行列を計算する．
+    評価指標を計算する関数。
+    metric_namesに応じて、accuracy, f1, confusion_matrix, mae, r2, rmse, mseを計算する。
+    calc_cmがTrueの場合は混同行列を計算する。
 
     Parameters
     ----------
     y : np.ndarray
-        正解値．
+        正解値。
     pred_y : np.ndarray
-        予測値．
+        予測値。
     metric_names : list[str]
-        評価指標の名前．
+        評価指標の名前。
         "acc", "f1", "mae", "r2", "rmse", "mse"...
     calc_cm : bool, default False
-        混同行列を計算するかどうか．
-        Trueの場合は混同行列を計算する．
+        混同行列を計算するかどうか。
+        Trueの場合は混同行列を計算する。
 
     Returns
     -------
     metrics : list[any]
-        評価指標の値．
-        metric_namesに応じて，accuracy, f1, confusion_matrix, mae, r2, rmse, mse, ...が格納される．
+        評価指標の値。
+        metric_namesに応じて、accuracy, f1, confusion_matrix, mae, r2, rmse, mse, ...が格納される。
     
     Notes
     -----
-    新たに評価指標を追加する場合は，この関数に追加する．
+    新たに評価指標を追加する場合は、この関数に追加する。
     elif name == "評価指標名":
         metrics.append({評価指標名}(y, pred_y))
     """
@@ -315,33 +319,33 @@ def calc_scores(y: np.ndarray, pred_y: np.ndarray, metric_names: list[str], calc
             else:
                 raise ValueError(f"Metric {name} is not defined.")
         if calc_cm:
-            # 混同行列を計算する場合は必ず最後に追加する．後にmetrcis[-1]で参照しているため
+            # 混同行列を計算する場合は必ず最後に追加する。後にmetrcis[-1]で参照しているため
             metrics.append(confusion_matrix(y, pred_y))
         return metrics
 
 class AvgMeter:
     """
-    平均値を計算するクラス．
-    updateメソッドで値を追加し，avgプロパティで平均値を取得する．
-    resetメソッドで初期化する．
+    平均値を計算するクラス。
+    updateメソッドで値を追加し、avgプロパティで平均値を取得する。
+    resetメソッドで初期化する。
 
     Attributes
     ----------
     _avg : float
-        平均値．
+        平均値。
     _sum : float
-        合計値．
+        合計値。
     _count : int
-        値の個数．
+        値の個数。
 
     Methods
     -------
     reset() -> None
-        初期化する．
+        初期化する。
     update(value: float) -> None
-        値を追加する．
+        値を追加する。
     avg() -> float
-        平均値を取得する．
+        平均値を取得する。
     """
     def __init__(self):
         self.reset()
@@ -362,23 +366,23 @@ class AvgMeter:
     
 class History:
     """
-    学習履歴を保存するクラス．
-    updateメソッドで値を追加し，histプロパティで履歴を取得する．
-    resetメソッドで初期化する．
+    学習履歴を保存するクラス。
+    updateメソッドで値を追加し、histプロパティで履歴を取得する。
+    resetメソッドで初期化する。
 
     Attributes
     ----------
     _hist : list[float]
-        学習履歴．
+        学習履歴。
 
     Methods
     -------
     reset() -> None
-        初期化する．
+        初期化する。
     update(value: float) -> None
-        値を追加する．
+        値を追加する。
     hist() -> list[float]
-        学習履歴を取得する．
+        学習履歴を取得する。
     """
     def __init__(self):
         self._hist = []
@@ -392,42 +396,42 @@ class History:
 
 class EarlyStopping:
     """
-    EarlyStoppingクラス．
-    指定したメトリックが改善されない場合に学習を停止する．
-    指定したパスに最良モデルを保存する．
+    EarlyStoppingクラス。
+    指定したメトリックが改善されない場合に学習を停止する。
+    指定したパスに最良モデルを保存する。
 
     Attributes
     ----------
     metric : str
-        モデルの評価指標．
+        モデルの評価指標。
         "acc", "f1", "mae", "r2", "rmse", "mse"...
     patience : int
-        何エポック改善されなかったら学習を停止するか．
+        何エポック改善されなかったら学習を停止するか。
     verbose : bool
-        学習の進捗を表示するかどうか．
+        学習の進捗を表示するかどうか。
     path : str
-        モデルを保存するパス．
+        モデルを保存するパス。
     best_score : float
-        最良のスコア．
+        最良のスコア。
     counter : int
-        改善されなかったエポック数．
+        改善されなかったエポック数。
     early_stop : bool
-        学習を停止するかどうか．
+        学習を停止するかどうか。
     direction : int
-        スコアの改善方向．
-        1ならスコアが大きくなる方向，-1ならスコアが小さくなる方向．
+        スコアの改善方向。
+        1ならスコアが大きくなる方向、-1ならスコアが小さくなる方向。
     
     Methods
     -------
     __call__(score: float, model: nn.Module) -> None
-        学習を停止するかどうかを判定する．
+        学習を停止するかどうかを判定する。
     _save_checkpoint(score: float, model: nn.Module) -> None
-        最良モデルを保存する．
+        最良モデルを保存する。
     
     Notes
     -----
-    新たに評価指標を追加した場合，__init__メソッドのdirectionのif文を修正する必要がある．
-    もし，新たな評価指標がスコアが大きいほど良い場合は，in ["acc", "f1", "r2"]に追加する．
+    新たに評価指標を追加した場合、__init__メソッドのdirectionのif文を修正する必要がある。
+    もし、新たな評価指標がスコアが大きいほど良い場合は、in ["acc", "f1", "r2"]に追加する。
     """
     def __init__(self, path, patience, verbose=False, metric=None):
         self.metric = metric

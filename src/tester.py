@@ -9,20 +9,20 @@ from conf.config import MyConfig
 
 class Tester:
     """
-    学習済みモデルの評価を行うクラス．
-    与えられたデータローダー（学習 or 検証 or テスト）に対して評価を行い，損失と評価指標を計算する．
+    学習済みモデルの評価を行うクラス。
+    与えられたデータローダー（学習 or 検証 or テスト）に対して評価を行い、損失と評価指標を計算する。
 
     Parameters
     ----------
     device : torch.device
-        使用するデバイス（GPU or CPU）．
+        使用するデバイス（GPU or CPU）。
     model : nn.Module
-        学習済みモデル．
+        学習済みモデル。
     criterion : nn.Module
-        損失関数．
+        損失関数。
     cfg : MyConfig
-        型ヒントとしてMyConfigを使っているHydraの構成オブジェクト．
-        実際はDictDotNotation型 or DictConfig型．
+        型ヒントとしてMyConfigを使っているHydraの構成オブジェクト。
+        実際はDictDotNotation型 or DictConfig型。
     """
     def __init__(self, device:torch.device, model: nn.Module, criterion, cfg: MyConfig):
         self.__model = model
@@ -36,20 +36,20 @@ class Tester:
     
     def test_step(self, test_loader: DataLoader) -> tuple[float, list[any]]:
         """
-        与えられたデータローダー（学習 or 検証 or テスト）に対して評価を行い，損失と評価指標を計算する関数．
+        与えられたデータローダー（学習 or 検証 or テスト）に対して評価を行い、損失と評価指標を計算する関数。
 
         Parameters
         ----------
         test_loader : DataLoader
-            評価用データローダー．
+            評価用データローダー。
 
         Returns
         -------
         avg_loss : float
-            平均損失．
+            平均損失。
         metrics : list[any]
-            評価指標のリスト．
-            cfg.data.metricsに指定された評価指標を計算する．
+            評価指標のリスト。
+            cfg.data.metricsに指定された評価指標を計算する。
         """
         # 1エポックの平均損失を計算する用
         avg_loss = AvgMeter()
@@ -64,7 +64,7 @@ class Tester:
             # --- 順伝播 ---
             output = self.__model(test_X)
             
-            # --- 損失計算，予測 ---
+            # --- 損失計算、予測 ---
             with torch.no_grad():
                 loss, pred_y = calc_loss_pred_y(self.cfg, output, test_y, self.criterion, self.device)
 

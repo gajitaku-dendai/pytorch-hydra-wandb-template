@@ -1,26 +1,39 @@
-# Hydraでは，段階的にconfigを設定できる．
-# conf/config.yamlを一層目とすると，
-# conf/data/**.yamlや，conf/model/**.yamlは二層目となる．
-# 二層目に何を使うかは，以下のdefaultsに - {ディレクトリ名}: {ファイル名（使いたいyamlフィアル）} で指定する．
+# Hydraでは、段階的にconfigを設定できる。
+# conf/config.yamlを一層目とすると、
+# conf/data/**.yamlや、conf/model/**.yamlは二層目となる。
+# 二層目に何を使うかは、以下のdefaultsに - {ディレクトリ名}: {ファイル名（使いたいyamlフィアル）} で指定する。
 defaults:
   - _self_
   - model: mlp # {mlp, cnn_2d, ...}
   - data: california_housing # {diabetes, california_housing, mnist, ...}
 
+
+
 ### for wandb ###
-use_wandb: True
+
+## wandbを使ってログを保存するかどうか
+use_wandb: True 
+
+## wandbのプロジェクト名: str型 (nullの場合、自動で生成される)
 wandb_project_name: null
-# wandb_project_name: example
+
+## sweep (パラメータチューニング) を使うかどうか
 use_sweep: False
+
+## sweepのid: str型。sweep_idはsweepを作成したときに表示される。
 sweep_id: ""
+
+## sweepのプロジェクト名: str型
 sweep_name: null
 
-### for kfold ###
-use_kfold: True
-kfold_n_splits: 5
-now_fold: null # don't change this, it will be set automatically
+## GPU(cuda)を使うか CPUを使うか
+device: "cuda" # {cuda, cpu}
 
-### automatic ###
-output_dir: null # don't change this, it will be set automatically
-note: null # you can add a note as 'output_dir/{note}.txt'
-# note: 'for comparison with baseline'
+### other ###
+
+## ログ出力先フォルダ。自動で定義されるのでnullにしておく
+output_dir: null
+
+## 指定した場合、output_dirに{note}というtxtができる。
+## 何かメモを残したい場合は、ここに書くとよい
+note: null 

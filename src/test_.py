@@ -14,31 +14,31 @@ def test(cfg: MyConfig,
          criterion: nn.Module,
          test_loader: DataLoader) -> nn.Module:
     """
-    モデルの評価を行う関数．
-    与えられたデータローダーに対して評価を行い，損失と評価指標を計算する．
-    得られた評価指標をプリントする．
+    モデルの評価を行う関数。
+    与えられたデータローダーに対して評価を行い、損失と評価指標を計算する。
+    得られた評価指標をプリントする。
 
     Parameters
     ----------
     cfg : MyConfig
-        型ヒントとしてMyConfigを使っているHydraの構成オブジェクト．
-        実際はDictDotNotation型 or DictConfig型．
+        型ヒントとしてMyConfigを使っているHydraの構成オブジェクト。
+        実際はDictDotNotation型 or DictConfig型。
     device : torch.device
-        使用するデバイス（GPU or CPU）．
+        使用するデバイス（GPU or CPU）。
     model : nn.Module
-        学習済みモデル．
+        学習済みモデル。
     criterion : nn.Module
-        損失関数．
+        損失関数。
     test_loader : DataLoader
-        評価用データローダー．
+        評価用データローダー。
     
     Returns
     -------
     loss : float
-        平均損失．
+        平均損失。
     metrics : list[any]
-        評価指標のリスト．
-        cfg.data.metricsに指定された評価指標を計算する．
+        評価指標のリスト。
+        cfg.data.metricsに指定された評価指標を計算する。
     """
     
     tester = Tester(device, model, criterion, cfg)       
@@ -60,71 +60,73 @@ def test(cfg: MyConfig,
 def evaluate_model(cfg: MyConfig, device: torch.device, model: nn.Module, criterion: nn.Module, train_loader: DataLoader,
                    valid_loader: DataLoader, test_loader: DataLoader, metrics: dict[str, list[any]]) -> dict[str, list[any]]:
     """
-    モデルの評価を行う関数．
-    学習用データ，検証用データ，テスト用データそれぞれに対して評価を行い，metricsに結果を追加する．
+    モデルの評価を行う関数。
+    学習用データ、検証用データ、テスト用データそれぞれに対して評価を行い、metricsに結果を追加する。
     
     Parameters
     ----------
     cfg : MyConfig
-        型ヒントとしてMyConfigを使っているHydraの構成オブジェクト．
-        実際はDictDotNotation型 or DictConfig型．
+        型ヒントとしてMyConfigを使っているHydraの構成オブジェクト。
+        実際はDictDotNotation型 or DictConfig型。
     device : torch.device
-        使用するデバイス（GPU or CPU）．
+        使用するデバイス（GPU or CPU）。
     model : nn.Module
-        学習したモデル．
+        学習したモデル。
     criterion : nn.Module
-        損失関数．
+        損失関数。
     train_loader : DataLoader
-        学習用データローダー．
+        学習用データローダー。
     valid_loader : DataLoader
-        検証用データローダー．
+        検証用データローダー。
     test_loader : DataLoader
-        テスト用データローダー．
+        テスト用データローダー。
     metrics : dict[str, list[any]]
-        評価指標を格納する辞書．
+        評価指標を格納する辞書。
     
     Returns
     -------
     metrics : dict[str, list[any]]
-        評価指標を格納する辞書．
-        各データセット（train, valid, test）ごとに評価指標が追加される．
+        評価指標を格納する辞書。
+        各データセット（train, valid, test）ごとに評価指標が追加される。
     """
     print("\n####################")
     print("result")
     print("####################\n")
     metrics = evaluate(cfg, device, model, criterion, train_loader, metrics, "train")
-    metrics = evaluate(cfg, device, model, criterion, valid_loader, metrics, "valid")
-    metrics = evaluate(cfg, device, model, criterion, test_loader, metrics, "test")
+    if valid_loader is not None:
+        metrics = evaluate(cfg, device, model, criterion, valid_loader, metrics, "valid")
+    if test_loader is not None:
+        metrics = evaluate(cfg, device, model, criterion, test_loader, metrics, "test")
     return metrics
 
 def evaluate(cfg: MyConfig, device: torch.device, model: nn.Module, criterion: nn.Module, loader: DataLoader,
              metrics: dict[str, list[any]], mode: str) -> dict[str, list[any]]:
     """
-    与えられたデータローダーに対するモデルの評価を行う関数．
+    与えられたデータローダーに対するモデルの評価を行う関数。
 
     Parameters
     ----------
     cfg : MyConfig
-        型ヒントとしてMyConfigを使っているHydraの構成オブジェクト．
-        実際はDictDotNotation型 or DictConfig型．
+        型ヒントとしてMyConfigを使っているHydraの構成オブジェクト。
+        実際はDictDotNotation型 or DictConfig型。
     device : torch.device
-        使用するデバイス（GPU or CPU）．
+        使用するデバイス（GPU or CPU）。
     model : nn.Module
-        学習したモデル．
+        学習したモデル。
     criterion : nn.Module
-        損失関数．
+        損失関数。
     loader : DataLoader
-        データローダー（学習or検証orテスト）．
+        データローダー（学習or検証orテスト）。
     metrics : dict[str, list[any]]
-        評価指標を格納する辞書．
+        評価指標を格納する辞書。
     mode : str
-        評価するデータセットの種類（train, valid, test）．
+        評価するデータセットの種類（train, valid, test）。
     
     Returns
     -------
     metrics : dict[str, list[any]]
-        評価指標を格納する辞書．
-        データローダー（学習 or 検証 or テスト）の評価指標が追加される．
+        評価指標を格納する辞書。
+        データローダー（学習 or 検証 or テスト）の評価指標が追加される。
     """
     print(mode)
     loss, metrics_value, true_list, pred_list = test(cfg, device, model, criterion, loader)

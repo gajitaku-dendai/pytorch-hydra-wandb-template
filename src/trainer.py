@@ -10,22 +10,22 @@ from conf.config import MyConfig
 
 class Trainer:
     """
-    1エポック，モデルの学習を行うクラス．
-    学習データに対して学習を行い，検証データに対して評価を行う．
+    1エポック、モデルの学習を行うクラス。
+    学習データに対して学習を行い、検証データに対して評価を行う。
 
     Parameters
     ----------
     device : torch.device
-        使用するデバイス（GPU or CPU）．
+        使用するデバイス（GPU or CPU）。
     model : nn.Module
-        学習するモデル．
+        学習するモデル。
     criterion : nn.Module
-        損失関数．
+        損失関数。
     optimizer : optim.Optimizer
-        最適化関数．
+        最適化関数。
     cfg : MyConfig
-        型ヒントとしてMyConfigを使っているHydraの構成オブジェクト．
-        実際はDictDotNotation型 or DictConfig型．
+        型ヒントとしてMyConfigを使っているHydraの構成オブジェクト。
+        実際はDictDotNotation型 or DictConfig型。
     """
     def __init__(self, device:torch.device, model: nn.Module, criterion, optimizer: optim.Optimizer, cfg: MyConfig):
         self.__model = model
@@ -40,22 +40,22 @@ class Trainer:
 
     def train_step(self, train_loader: DataLoader) -> tuple[float, list[any]]:
         """
-        学習データに対し，1エポックの学習を行う関数．
-        ミニバッチ処理を行い，損失と予測値を計算し，逆伝播．
-        バッチ処理後に評価指標を計算．
+        学習データに対し、1エポックの学習を行う関数。
+        ミニバッチ処理を行い、損失と予測値を計算し、逆伝播。
+        バッチ処理後に評価指標を計算。
 
         Parameters
         ----------
         train_loader : DataLoader
-            学習用データローダー．
+            学習用データローダー。
         
         Returns
         -------
         avg_loss : float
-            1エポックの平均損失．
+            1エポックの平均損失。
         metrics : list[any]
-            評価指標のリスト．
-            cfg.data.metricsに指定された評価指標を計算する．
+            評価指標のリスト。
+            cfg.data.metricsに指定された評価指標を計算する。
         """
         # 1エポックの平均損失を計算する用
         avg_loss = AvgMeter()
@@ -70,7 +70,7 @@ class Trainer:
             # --- 順伝播 ---
             output = self.__model(train_X)
             
-            # --- 損失計算，予測 ---
+            # --- 損失計算、予測 ---
             loss, pred_y = calc_loss_pred_y(self.cfg, output, train_y, self.criterion, self.device)
             
             # --- 逆伝播 ---
@@ -93,22 +93,22 @@ class Trainer:
     
     def valid_step(self, valid_loader: DataLoader) -> tuple[float, list[any]]:
         """
-        検証データ（テストデータ）に対し，1エポックの検証を行う関数．
-        ミニバッチ処理を行い，損失と予測値を計算．
-        バッチ処理後に評価指標を計算．
+        検証データ（テストデータ）に対し、1エポックの検証を行う関数。
+        ミニバッチ処理を行い、損失と予測値を計算。
+        バッチ処理後に評価指標を計算。
         
         Parameters
         ----------
         valid_loader : DataLoader
-            検証用（テスト用）データローダー．
+            検証用（テスト用）データローダー。
         
         Returns
         -------
         avg_loss : float
-            1エポックの平均損失．
+            1エポックの平均損失。
         metrics : list[any]
-            評価指標のリスト．
-            cfg.data.metricsに指定された評価指標を計算する．
+            評価指標のリスト。
+            cfg.data.metricsに指定された評価指標を計算する。
         """
         # 1エポックの平均損失を計算する用
         avg_loss = AvgMeter()
@@ -123,7 +123,7 @@ class Trainer:
             # --- 順伝播 ---
             output = self.__model(test_X)
             
-            # --- 損失計算，予測 ---
+            # --- 損失計算、予測 ---
             with torch.no_grad():
                 loss, pred_y = calc_loss_pred_y(self.cfg, output, test_y, self.criterion, self.device)            
 
