@@ -8,7 +8,7 @@ from conf.config import MyConfig
 from utils import DictDotNotation, print_config, print_mode, print_final_results, \
     log_metrics_to_wandb, initialize_metrics, load_data, load_model, save_model, torch_fix_seed, load_config
 from train import train
-from test_ import evaluate_model
+from evaluate import evaluate_model
 import multiprocessing
 
 # --- スレッド数をCPUコア数の80%に設定 ---

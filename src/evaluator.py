@@ -7,7 +7,7 @@ from tqdm import tqdm
 from utils import AvgMeter, calc_loss_pred_y, calc_scores
 from conf.config import MyConfig
 
-class Tester:
+class Evaluator:
     """
     学習済みモデルの評価を行うクラス。
     与えられたデータローダー（学習 or 検証 or テスト）に対して評価を行い、損失と評価指標を計算する。

@@ -5,14 +5,15 @@ from torch.utils.data import DataLoader
 
 # 自作クラス
 from utils import *
-from tester import *
+from evaluator import * 
 from conf.config import MyConfig
 
-def test(cfg: MyConfig,
+def evaluate_one_split(cfg: MyConfig,
          device: torch.device,
          model: nn.Module,
          criterion: nn.Module,
-         test_loader: DataLoader) -> nn.Module:
+         test_loader: DataLoader) -> tuple[float, list[any], list[any], list[any]]:
+
     """
     モデルの評価を行う関数。
     与えられたデータローダーに対して評価を行い、損失と評価指標を計算する。
@@ -39,11 +40,15 @@ def test(cfg: MyConfig,
     metrics : list[any]
         評価指標のリスト。
         cfg.data.metricsに指定された評価指標を計算する。
+    true_list : list[any]
+        正解値のリスト。
+    pred_list : list[any]
+        予測値のリスト。
     """
     
-    tester = Tester(device, model, criterion, cfg)       
-    tester.model.eval()
-    loss, metrics, true_list, pred_list = tester.test_step(test_loader) 
+    evaluator = Evaluator(device, model, criterion, cfg)       
+    evaluator.model.eval()
+    loss, metrics, true_list, pred_list = evaluator.test_step(test_loader)
 
     cm = None
     if cfg.data.calc_cm:
@@ -56,6 +61,7 @@ def test(cfg: MyConfig,
     print("\n")
 
     return loss, metrics, true_list, pred_list
+
 
 def evaluate_model(cfg: MyConfig, device: torch.device, model: nn.Module, criterion: nn.Module, train_loader: DataLoader,
                    valid_loader: DataLoader, test_loader: DataLoader, metrics: dict[str, list[any]]) -> dict[str, list[any]]:
@@ -92,17 +98,17 @@ def evaluate_model(cfg: MyConfig, device: torch.device, model: nn.Module, criter
     print("\n####################")
     print("result")
     print("####################\n")
-    metrics = evaluate(cfg, device, model, criterion, train_loader, metrics, "train")
+    metrics = evaluate_one_split_and_log(cfg, device, model, criterion, train_loader, metrics, "train")
     if valid_loader is not None:
-        metrics = evaluate(cfg, device, model, criterion, valid_loader, metrics, "valid")
+        metrics = evaluate_one_split_and_log(cfg, device, model, criterion, valid_loader, metrics, "valid")
     if test_loader is not None:
-        metrics = evaluate(cfg, device, model, criterion, test_loader, metrics, "test")
+        metrics = evaluate_one_split_and_log(cfg, device, model, criterion, test_loader, metrics, "test")
     return metrics
 
-def evaluate(cfg: MyConfig, device: torch.device, model: nn.Module, criterion: nn.Module, loader: DataLoader,
+def evaluate_one_split_and_log(cfg: MyConfig, device: torch.device, model: nn.Module, criterion: nn.Module, loader: DataLoader,
              metrics: dict[str, list[any]], mode: str) -> dict[str, list[any]]:
     """
-    与えられたデータローダーに対するモデルの評価を行う関数。
+    与えられたデータローダーに対するモデルの評価を行い、結果をログに記録する関数。
 
     Parameters
     ----------
@@ -129,7 +135,7 @@ def evaluate(cfg: MyConfig, device: torch.device, model: nn.Module, criterion: n
         データローダー（学習 or 検証 or テスト）の評価指標が追加される。
     """
     print(mode)
-    loss, metrics_value, true_list, pred_list = test(cfg, device, model, criterion, loader)
+    loss, metrics_value, true_list, pred_list = evaluate_one_split(cfg, device, model, criterion, loader)
     metrics[f"{mode}_loss"].append(loss)
     metrics[f"{mode}_true"].append(true_list)
     metrics[f"{mode}_pred"].append(pred_list)
