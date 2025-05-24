@@ -3,21 +3,21 @@
 ## はじめに
 
 このリポジトリは、  
-**Python × WSL2 × pyenv × poetry × Hydra × W&B × PyTorch** を使って  
+**Python × pyenv × poetry × Hydra × W&B × PyTorch** を使って  
 **「これから機械学習を始めたい人」** や  
-**「再現性の高い環境を構築したい人」** のためのテンプレート（フレームワーク）です。
+**「再現性の高い開発環境を構築したい人」** のためのテンプレート（フレームワーク）です。
 
-✅ 初学者でもわかりやすく  
-✅ Pythonの環境構築から可視化・ログ管理までカバー  
-✅ すぐに開発を始められる構成になっています
+✅ 初心者でもわかりやすく  
+✅ Pythonの環境構築からモデル実装、可視化・ログ管理までカバー  
+✅ すぐに開発を始められる構成
 
 ---
 
 ## 特徴
 
-- Windows / Linux 対応（WSL2前提 or ネイティブ環境OK）
-- `pyenv` × `poetry` によるシンプルなPython環境管理
+- `pyenv` × `Poetry` によるシンプルなPython環境管理
 - `Hydra` で柔軟な設定ファイル管理
+  - 設定ファイルからモデルとデータセットを柔軟に組み合わせ可能
 - `Weights & Biases` による実験ログ・可視化
 - リポジトリ全体が再利用可能なテンプレート
 
@@ -27,7 +27,6 @@
 
 | ツール | 役割 |
 |--------|------|
-| [WSL2](https://learn.microsoft.com/ja-jp/windows/wsl/) | WindowsでLinux環境を使うための仕組み |
 | [pyenv](https://github.com/pyenv/pyenv) | Pythonバージョン管理 |
 | [poetry](https://python-poetry.org/) | パッケージ・仮想環境管理 |
 | [Hydra](https://github.com/facebookresearch/hydra) | 設定ファイルの管理 |
@@ -50,56 +49,69 @@
 .
 ├── outputs  # Hydraのログ出力
 ├── wandb # W&Bのログ出力
-├── pyproject.toml
+├── pyproject.toml # Poetryのパッケージ管理用ファイル
 └── src
     ├── architecture # モデルクラス保存ディレクトリ
     │   ├── __init__.py
     │   ├── cnn_2d.py # モデルの例: 2D-CNN
     │   └── mlp.py # モデルの例: MLP
+    │
     ├── conf # Hydra用Configディレクトリ
     │   ├── __init__.py
-    │   ├── config.py
-    │   ├── config.yaml # このファイルを参照して、Hydraの使い方を学ぼう。
-    │   ├── data
+    │   ├── config.py # 型定義ファイル
+    │   ├── config.yaml # Hydraパラメータ管理（全体）
+    │   ├── data # Hydraパラメータ管理（データセットごと）
     │   │   ├── california_housing.yaml
     │   │   ├── diabetes.yaml
     │   │   └── mnist.yaml
-    │   ├── model
+    │   ├── model # Hydraパラメータ管理（モデルごと）
     │   │   ├── cnn_2d.yaml
     │   │   └── mlp.yaml
     │   └── sweep.yaml
+    │
     ├── database # データセット保存用ディレクトリ
     │   ├── __init__.py
     │   ├── california_housing # データセットの例: California Housing
-    │   │   ├── california_housing_dataset.py
-    │   │   ├── features
-    │   │   └── load_data.ipynb # これを事前に実行すること。
+    │   │   ├── california_housing_dataset.py # データをまとめあげるファイル
+    │   │   ├── features # データの実態が存在するフォルダ
+    │   │   └── load_data.ipynb # データの読み込みをするノートブック
     │   ├── diabetes # データセットの例: Diabetes
-    │   │   ├── diabetes_dataset.py
-    │   │   ├── features
-    │   │   │   └── raw
-    │   │   └── load_data.ipynb # これを事前に実行すること。
-    │   └── mnist # データセットの例: MNIST
-    │       ├── img
-    │       │   └── raw
-    │       ├── load_data.ipynb # これを事前に実行すること。
-    │       └── mnist_dataset.py
+    │   │   ├── diabetes_dataset.py # データをまとめあげるファイル
+    │   │   ├── features # データの実態が存在するフォルダ
+    │   │   └── load_data.ipynb # データの読み込みをするノートブック
+    │   │── mnist # データセットの例: MNIST
+    │   │   ├── img # データの実態が存在するフォルダ
+    │   │   ├── load_data.ipynb # データの読み込みをするノートブック
+    │   │   └── mnist_dataset.py # データをまとめあげるファイル
+    │   └── base_dataset.py # データをまとめ上げるファイルの既定ファイル
+    │
     ├── main.py # 学習実行ファイル (コマンドラインから実行するのはこのファイル)
     ├── models # 学習済モデルの重み保存ディレクトリ
-    ├── notebook # .ipynbファイルはこちら
-    │   └── check_model.ipynb
-    ├── test_.py
-    ├── tester.py
-    ├── train.py
-    ├── trainer.py
+    ├── notebook # .ipynbファイル（ノートブック）を保存するフォルダ
+    │   └── check_model.ipynb # モデルの構造をチェックするノートブック
+    ├── evaluate.py # モデルの評価をするファイル
+    ├── evaluator.py # 実際にモデルの評価（epoch単位）をするファイル
+    ├── train.py # モデルの学習をするファイル
+    ├── trainer.py # 実際にモデルの学習（epoch単位）をするファイル
+    │
     └── utils # 様々な関数を保存
         ├── __init__.py
-        ├── dataProcessor.py
-        ├── main_utils.py
-        └── training_utils.py
+        ├── dataProcessor.py # 主にデータ関連の関数が存在
+        ├── main_utils.py # 主にmain.pyで活用する関数が存在
+        └── training_utils.py # 主に学習に関する関数が存在
 ```
 
 ---
+
+## 事前準備  
+
+1. `pyenv` と `Poetry` のインストール
+インストール方法については、筆者が作成した以下の記事を読んでください。
+[pyenv × PoetryでPythonのパッケージ管理を効率化！（Windows / Linux 両対応・初心者歓迎）](https://qiita.com/gajitaku/items/c50b945725fcf8d75bb8)
+
+2. W&Bへの新規登録
+[W&B公式サイト](https://wandb.ai/site/ja/)からアカウントを登録。
+設定画面からAPI keyを取得してコピーしておきましょう。
 
 ## セットアップ方法
 
@@ -124,16 +136,121 @@ poetry run python src/main.py
 
 ## 使い方
 
-すべてのファイルにコメントを記述済み！  
-main.pyをまず参照し、どんな順番で実行されていくか隅々まで読んで理解して、使い倒してください！  
+- このフレームワークは、`src/main.py` がすべての処理をまとめる核になっています
+- 基本的な学習や評価のフローは、この `main.py` を読めば全体の流れが把握できます！
+- すべてのファイルには詳細なコメントを書いておいたので、各ファイルの中身を読み進めることで、詳細な挙動や設定方法は深く理解できるはずです
+- 文字が多くて読み飛ばしたくなる気持ちは痛いほどわかりますが、**読み飛ばした瞬間理解できなくなります** のでちゃんと読もう
 
-すぐに試せるよう、サンプルのデータセットとモデルクラスも用意済みです！  
-（src/database/ と src/architecture/ をご参照ください）  
-databse/**/load_data.ipynbを実行すると、データがロードされます。  
+### 1. データの準備
 
-📌 現在「使い方」は随時更新中です！  
-📌 解説サイトも作成中のため，しばしお待ちください！  
-📌 The English version is currently under construction.  
+まず、学習につかうデータを準備する必要があります。サンプルのデータセットを用意してありますので、対応する `load_data.ipynb` を実行してデータをダウンロードしてください。
+
+- MNISTデータセット
+  - 手書き数字の分類問題で使われるデータセット
+  - 対応ファイル: `src/database/mnist/load_data.ipynb`
+  - 実行すると、`src/database/mnist/img/raw/` ディレクトリに画像データが保存される
+
+- California Housingデータセット
+  - カリフォルニア州の住宅価格予測で使われる回帰データセット
+  - 対応ファイル: `src/database/california_housing/load_data.ipynb`
+  - 実行すると、`src/database/california_housing/features/raw/` ディレクトリに特徴量データが保存される
+
+- Diabetesデータセット
+  - 糖尿病の進行度予測で使われる回帰データセット
+  - 対応ファイル: `src/database/diabetes/load_data.ipynb`
+  - 実行すると、`src/database/diabetes/features/raw/` ディレクトリに特徴量データが保存される
+
+実際に、自分でデータセットを用意する場合は、各サンプルデータセットを参考にファイルを作成してください。
+例えば、`abc` というデータセットを用意する場合は以下の手順でファイルを追加・変更します。
+
+1. `src/database/abc` というフォルダを作成する
+2. `src/dtabase/abc/load_data.ipynb` を各サンプルデータセットの該当ファイルを参考に作成し、データを `src/database/abc/**/**/**.npy` として保存する
+3. `src/database/abc/abc_dataset.py` を各サンプルデータセットの該当ファイルを参考に作成する
+`MyDataset(BaseDataset)` と `TrainDataset(MyDataset)` と `ValidDataset(MyDataset)` と `TestDataset(MyDataset)` クラスを作成しよう（基本サンプルファイルをコピペして、`TrainDataset`内の`input_type`に依存しているところを変更すればOK）
+4. `src/database/__init__.py` の `get_dataset()` に `abc_dataset` の分岐を追加する
+5. `src/conf/data/abc.yaml` を各サンプルデータセットの該当yamlファイルを参考に作成する
+yamlファイル内の `name` は `"abc"` とすること
+
+### 2. モデルを新規で追加する場合
+
+このフレームワークではサンプルのモデルを2つ用意してあります。
+
+- MLP
+  - 線形層と活性化関数のみのニューラルネットワークモデル
+  - 対応ファイル: `src/architecture/mlp.py`
+
+- 2D-CNN
+  - 画像を扱う畳み込みニューラルネットワークモデル
+  - 対応ファイル: `src/architecture/cnn_2d.py`
+
+実際に、自分でモデルを新たに用意する場合は、各サンプルモデルを参考にファイルを作成してください。
+例えば、`abc` というモデルを用意する場合は以下の手順でファイルを追加・変更します。
+
+1. `src/architecture/abc.py` を各サンプルモデルのファイルを参考に作成する
+各サンプルモデルと同様に `ABC` クラスと `get_model()` 関数を作成しましょう
+2. `src/architecture/__init__.py` の `get_model()` に `abc` の分岐を追加する
+3. `src/conf/model/abc.yaml` を各サンプルモデルの該当yamlファイルを参考に作成する
+yamlファイル内の `name` は `"abc"` とすること
+
+### 3. 使うモデルやデータセット、パラメータを変更する方法
+
+- 学習のモデルやデータセット、ハイパーパラメータの設定は、`src/conf/config.yaml` を編集して行う
+- このファイルは **Hydra** によって管理されていて、 `model` や `data` といったサブ設定ファイルを読み込むようになっている。
+
+#### 例1. MNISTデータセットで2D-CNNモデルを動かす場合
+
+1. `src/conf/config.yaml` を以下のように編集する
+
+    ```yaml:config.yaml
+    ### src/conf/config.yaml
+
+    defaults:
+    - _self_
+    - model: cnn_2d # CNN_2Dモデルを使用
+    - data: mnist # MNISTデータセットを使用
+
+    # ... その他の設定はデフォルトでOK
+    ```
+
+2. 必要であれば、`src/conf/model/cnn_2d.yaml` や `src/conf/data/mnist.yaml` 内のハイパーパラメータやデータ処理の設定を調整してください
+
+#### 例2. California HousingデータセットでMLPモデルを動かす場合
+
+1. `src/conf/config.yaml` を以下のように編集する
+
+    ```yaml:config.yaml
+    ### src/conf/config.yaml
+
+    defaults:
+    - _self_
+    - model: mlp # MLPモデルを使用
+    - data: california_housing # California Housingデータセットを使用
+
+    # ... その他の設定はデフォルトでOK
+    ```
+
+2. 必要であれば、`src/conf/model/mlp.yaml` や `src/conf/data/california_housing.yaml` 内のハイパーパラメータやデータ処理の設定を調整してください
+
+### 4. 学習の実行
+
+- 設定が終わったら、`src/main.py` を実行するだけ
+
+```bash:Bash
+poetry run python src/main.py
+```
+
+- これで、指定したモデルとデータセットで学習が始まり、Weights & Biasesへのログ記録や、設定された評価指標の表示、Early Stoppingなどの機能が自動的に実行されます！
+
+### 5. Hydraならではの簡単な設定変更方法
+
+- 例えば、MNISTデータセットを2D-CNNモデルに入力して、モデルのエポック数を50にしたい！と思ったとき、yamlファイルを変更しないで、コマンドライン上で指定することもできます。
+
+```bash:Bash
+poetry run python src/main.py data=mnist model=cnn_2d model.epochs=50
+```
+
+`src/main.py` の後に、順不同で設定したい変数を上記のように指定するだけです。
+このように指定した場合、yamlファイル上の設定を上書きして実行することができます。
 
 ---
 
