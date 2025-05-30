@@ -126,7 +126,7 @@ pyenv local 3.11.9
 poetry install
 
 # wandbの設定
-wandb login #APIキーの入力
+poetry run wandb login #APIキーの入力
 
 # 学習の実行（例）
 poetry run python src/main.py
