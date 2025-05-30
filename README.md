@@ -118,7 +118,7 @@
 ```bash
 # リポジトリをクローン
 git clone https://github.com/gajitaku-dendai/pytorch-hydra-wandb-template.git
-cd ml-template
+cd pytorch-hydra-wandb-template
 
 # Python環境のセットアップ（pyenv と poetry インストール前提）
 pyenv install 3.11.9
