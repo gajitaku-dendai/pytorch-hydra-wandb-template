@@ -117,7 +117,7 @@
 
 ```bash
 # リポジトリをクローン
-git clone https://github.com/gajitaku-dendai/ml-template.git
+git clone https://github.com/gajitaku-dendai/pytorch-hydra-wandb-template.git
 cd ml-template
 
 # Python環境のセットアップ（pyenv と poetry インストール前提）
