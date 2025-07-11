@@ -89,7 +89,8 @@ def main(cfg: MyConfig) -> None:
     # ---------------------------------------------------------------
     if cfg.use_wandb:
         # wandbを初期化し、Hydraのconfigをwandbのconfigとしてログに記録する。
-        wandb.init(project=project_name, config=OmegaConf.to_container(cfg, resolve=True, throw_on_missing=True))
+        wandb.init(project=project_name, config=OmegaConf.to_container(cfg, resolve=True, throw_on_missing=True),
+                   dir=hydra.core.hydra_config.HydraConfig.get().runtime.output_dir)
         # wandb.configはdot-notationでアクセスできないため、DictDotNotationに変換する。
         # これにより、cfg.model.nameのように直接属性としてアクセスできるようになる。
         cfg = DictDotNotation(wandb.config)

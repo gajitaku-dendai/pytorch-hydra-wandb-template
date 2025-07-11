@@ -47,8 +47,7 @@
 
 ```bash
 .
-├── outputs  # Hydraのログ出力
-├── wandb # W&Bのログ出力
+├── outputs  # Hydraのログ出力 (W&Bのログもここに格納)
 ├── pyproject.toml # Poetryのパッケージ管理用ファイル
 └── src
     ├── architecture # モデルクラス保存ディレクトリ
