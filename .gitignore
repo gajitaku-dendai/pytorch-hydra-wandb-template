@@ -19,3 +19,4 @@ outputs/
 multirun/
 *.pyc
 */__pycache__/*
+notebook.ipynb

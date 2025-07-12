@@ -4,6 +4,7 @@ from hydra.core.global_hydra import GlobalHydra
 from omegaconf import OmegaConf
 import torch
 import wandb
+import shutil
 from conf.config import MyConfig
 from utils import DictDotNotation, print_config, print_mode, print_final_results, \
     log_metrics_to_wandb, initialize_metrics, load_data, load_model, save_model, torch_fix_seed, load_config
@@ -163,6 +164,19 @@ def main(cfg: MyConfig) -> None:
     finally:
         if cfg.use_wandb:
             wandb.run.finish()
+
+        cache_path = ".cache"
+        # cacheディレクトリ内のファイルをすべて削除
+        if os.path.exists(cache_path) and os.path.isdir(cache_path):
+            for filename in os.listdir(cache_path):
+                file_path = os.path.join(cache_path, filename)
+                try:
+                    if os.path.isfile(file_path) or os.path.islink(file_path):
+                        os.remove(file_path)
+                    elif os.path.isdir(file_path):
+                        shutil.rmtree(file_path)
+                except Exception as e:
+                    print(f"Failed to delete {file_path}. Reason: {e}")
 
 if __name__ == "__main__":
     main()

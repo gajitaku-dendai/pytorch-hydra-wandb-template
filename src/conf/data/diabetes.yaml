@@ -50,5 +50,8 @@ data_splits: [train, valid, test] # {train, valid, test}
 # 自由に追加してください。
 # 追加した変数を用いて、database/**/**_dataset.pyの中で処理を追加してください。
 use_pca: False
-pca_n_components: 0.95
+pca_n_components: 7 # memmap=Trueならintでしか指定できないので注意
 standardize_type: per_feature # {all, none, per_ch, per_feature}
+
+memmap: False # Trueにすると、メモリマップを使ってデータを読み込む
+mmap_batch_size: 128 # 一度にメモリに乗せる行数（PCのメモリに合わせて調整）
