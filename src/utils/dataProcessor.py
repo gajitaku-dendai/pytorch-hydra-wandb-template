@@ -49,16 +49,16 @@ def load_data(cfg: MyConfig, fold: int) -> tuple[DataLoader, DataLoader, DataLoa
     train_dataset, valid_dataset, test_dataset = get_dataset(cfg, now_fold=fold)
     cfg.model.num_channels = train_dataset.num_channels
     cfg.model.input_size = train_dataset.input_size
-    print_dataset_details(cfg, train_dataset, valid_dataset, test_dataset)
+    train_shape = print_get_dataset_details(cfg, train_dataset, valid_dataset, test_dataset)
     train_loader = dataset_to_dataloader(train_dataset, batch_size=cfg.model.batch_size)
     valid_loader = dataset_to_dataloader(valid_dataset, batch_size=cfg.model.test_batch_size, isValid=True)
     test_loader = dataset_to_dataloader(test_dataset, batch_size=cfg.model.test_batch_size, isTest=True)
     print("success to load data!\n\n")
-    return train_loader, valid_loader, test_loader
+    return train_loader, valid_loader, test_loader, train_shape
 
-def print_dataset_details(cfg: MyConfig, train_dataset: Dataset, valid_dataset: Dataset, test_dataset: Dataset) -> None:
+def print_get_dataset_details(cfg: MyConfig, train_dataset: Dataset, valid_dataset: Dataset, test_dataset: Dataset) -> tuple:
     """
-    データセットの詳細を表示する関数。
+    データセットの詳細を表示，データのshapeを返却する関数。
     train_dataset, valid_dataset, test_datasetの各データセットの詳細（クラス分布 or サンプル数）を表示する。
 
     Parameters
@@ -85,7 +85,9 @@ def print_dataset_details(cfg: MyConfig, train_dataset: Dataset, valid_dataset: 
             print("valid_details (length):", len(valid_dataset))
         if test_dataset is not None:
             print("test_details (length):", len(test_dataset))
-    print("data_shape (except num_sample):", train_dataset[0][0].shape)
+    train_shape = train_dataset[0][0].shape
+    print("data_shape (except num_sample):", train_shape)
+    return train_shape
 
 def dataset_to_dataloader(dataset, batch_size, isValid=False, isTest=False):
     """

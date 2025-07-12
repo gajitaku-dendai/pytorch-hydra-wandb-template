@@ -78,6 +78,29 @@ def print_mode(use_kfold: bool) -> None:
     print(mode)
     print("####################\n\n")
 
+def torchinfo_summary(cfg:MyConfig, model: torch.nn.Module, input_shape: tuple[int, ...] | list[tuple]) -> None:
+    """
+    モデルの概要を表示する関数．torchinfoを使ってモデルの概要を表示する．
+
+    Parameters
+    ----------
+    model : torch.nn.Module
+        モデルのインスタンス．
+    input_shape : tuple[int, ...]
+        モデルに入力するデータの形状．
+        例: (batch_size, channels, height, width) のような形状．
+    """
+    from torchinfo import summary
+    print("####################")
+    print("Model Summary")
+    print("#####################\n")
+
+    dummy_input = torch.randn(1, *input_shape).cuda()
+    
+    summary(model, input_data=[dummy_input], depth=6, col_names=["input_size", "output_size", "num_params", "trainable"], device="cuda")
+    
+    print()
+
 def _get_class_names(cfg: MyConfig) -> list[str]:
     """
     クラス名を決定するヘルパー関数。

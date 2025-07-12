@@ -93,74 +93,77 @@ def train(cfg: MyConfig,
     scheduler, sch_type = get_scheduler(optimizer, cfg)
 
     # --- 学習 ---
-    for epoch in tqdm(range(cfg.model.epochs), desc="Epochs", leave=True):
-        trainer.model.train()
-        # --- 学習データの学習 ---
-        train_loss, train_metrics = trainer.train_step(train_loader)
-        # --- 指標の履歴を更新 ---
-        history['train_loss'].update(train_loss)
-        for metric, value in zip(cfg.data.metrics, train_metrics):
-            history[f"train_{metric}"].update(value)
+    try:
+        for epoch in tqdm(range(cfg.model.epochs), desc="Epochs", leave=True):
+            trainer.model.train()
+            # --- 学習データの学習 ---
+            train_loss, train_metrics = trainer.train_step(train_loader)
+            # --- 指標の履歴を更新 ---
+            history['train_loss'].update(train_loss)
+            for metric, value in zip(cfg.data.metrics, train_metrics):
+                history[f"train_{metric}"].update(value)
 
-        trainer.model.eval()
+            trainer.model.eval()
 
-        if valid_loader is not None:
-            # --- 検証データの検証 ---
-            valid_loss, valid_metrics = trainer.valid_step(valid_loader)
-            history['valid_loss'].update(valid_loss)
-            for metric, value in zip(cfg.data.metrics, valid_metrics):
-                history[f"valid_{metric}"].update(value)
+            if valid_loader is not None:
+                # --- 検証データの検証 ---
+                valid_loss, valid_metrics = trainer.valid_step(valid_loader)
+                history['valid_loss'].update(valid_loss)
+                for metric, value in zip(cfg.data.metrics, valid_metrics):
+                    history[f"valid_{metric}"].update(value)
 
-        if test_loader is not None:
-            # --- テストデータの検証 ---
-            test_loss, test_metrics = trainer.valid_step(test_loader)
-            history['test_loss'].update(test_loss)
-            for metric, value in zip(cfg.data.metrics, test_metrics):
-                history[f"test_{metric}"].update(value)
+            if test_loader is not None:
+                # --- テストデータの検証 ---
+                test_loss, test_metrics = trainer.valid_step(test_loader)
+                history['test_loss'].update(test_loss)
+                for metric, value in zip(cfg.data.metrics, test_metrics):
+                    history[f"test_{metric}"].update(value)
 
-        # --- ログ出力 ---
-        print("\n\n", end="")
-        for phase in cfg.data.data_splits:
-            loss = history[f"{phase}_loss"].hist[-1]
-            metrics = [history[f"{phase}_{metric}"].hist[-1] for metric in cfg.data.metrics]
-            print(f"{phase}_loss: {loss:.5f}", end=", ")
-            for metric_name, metric_value in zip(cfg.data.metrics, metrics):
-                print(f"{phase}_{metric_name}: {metric_value:.5f}", end=", ")
-        print()
-
-        # --- Early Stopping ---
-        if use_early_stopping:
-            early_stopping(history[scheduler_metric].hist[-1], model)
-
-        # --- wandbへのログ出力 ---
-        if cfg.use_wandb:
-            step = epoch + int(cfg.model.epochs * now_fold * 1.5)
-            log_dict = {}
+            # --- ログ出力 ---
+            print("\n\n", end="")
             for phase in cfg.data.data_splits:
-                log_dict[f"{phase}_loss"] = history[f"{phase}_loss"].hist[-1]
-            for metric in cfg.data.metrics:
-                log_dict[f"{phase}_{metric}"] = history[f"{phase}_{metric}"].hist[-1]
-            log_dict.update({
-                "lr": optimizer.param_groups[0]['lr'],
-                "epoch": epoch
-            })
-            wandb.log(log_dict, step=step)
-        
-        # --- 定期的なモデルの保存 ---
-        if (epoch == 0) or ((epoch + 1) % 10 == 0):
-            torch.save(model.state_dict(), f"{cfg.output_dir}/last.pth")
+                loss = history[f"{phase}_loss"].hist[-1]
+                metrics = [history[f"{phase}_{metric}"].hist[-1] for metric in cfg.data.metrics]
+                print(f"{phase}_loss: {loss:.5f}", end=", ")
+                for metric_name, metric_value in zip(cfg.data.metrics, metrics):
+                    print(f"{phase}_{metric_name}: {metric_value:.5f}", end=", ")
+            print()
 
-        # --- Early Stoppingフラグ ---
-        if use_early_stopping:
-            if early_stopping.early_stop:
-                print("Early Stopping!")
-                break
+            # --- Early Stopping ---
+            if use_early_stopping:
+                early_stopping(history[scheduler_metric].hist[-1], model)
 
-        # --- 学習率スケジューラー更新 ---
-        if sch_type == "torch":
-            scheduler.step()
-        elif sch_type == "timm":
-            scheduler.step(epoch)
+            # --- wandbへのログ出力 ---
+            if cfg.use_wandb:
+                step = epoch + int(cfg.model.epochs * now_fold * 1.5)
+                log_dict = {}
+                for phase in cfg.data.data_splits:
+                    log_dict[f"{phase}_loss"] = history[f"{phase}_loss"].hist[-1]
+                for metric in cfg.data.metrics:
+                    log_dict[f"{phase}_{metric}"] = history[f"{phase}_{metric}"].hist[-1]
+                log_dict.update({
+                    "lr": optimizer.param_groups[0]['lr'],
+                    "epoch": epoch
+                })
+                wandb.log(log_dict, step=step)
+            
+            # --- 定期的なモデルの保存 ---
+            if (epoch == 0) or ((epoch + 1) % 10 == 0):
+                torch.save(model.state_dict(), f"{cfg.output_dir}/last.pth")
+
+            # --- Early Stoppingフラグ ---
+            if use_early_stopping:
+                if early_stopping.early_stop:
+                    print("Early Stopping!")
+                    break
+
+            # --- 学習率スケジューラー更新 ---
+            if sch_type == "torch":
+                scheduler.step()
+            elif sch_type == "timm":
+                scheduler.step(epoch)
+    except KeyboardInterrupt:
+        print("Training interrupted by user.")
 
     print("Finished Training")
     torch.save(model.state_dict(), f"{cfg.output_dir}/last.pth")

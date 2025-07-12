@@ -7,7 +7,7 @@ import wandb
 import shutil
 from conf.config import MyConfig
 from utils import DictDotNotation, print_config, print_mode, print_final_results, \
-    log_metrics_to_wandb, initialize_metrics, load_data, load_model, save_model, torch_fix_seed, load_config
+    log_metrics_to_wandb, initialize_metrics, load_data, load_model, save_model, torch_fix_seed, load_config, torchinfo_summary
 from train import train
 from evaluate import evaluate_model
 import multiprocessing
@@ -103,17 +103,16 @@ def main(cfg: MyConfig) -> None:
     print(f"Output directory: {cfg.output_dir}")
 
     try:
-        # --- プロジェクト名がわかるように出力ディレクトリにファイル名として保存 ---
+        # --- プロジェクト名がわかるように出力ディレクトリ（時間ディレクトリ直下）にファイル名として保存 ---
         # cfg.noteが指定されている場合は、note.txtも作成する。
-        with open(f'{cfg.output_dir}/{project_name}.txt', 'w'):
+        with open(f'{hydra.core.hydra_config.HydraConfig.get().runtime.output_dir}/{project_name}.txt', 'w'):
             pass
         if cfg.note:
-            with open(f'{cfg.output_dir}/note.txt', 'w') as f:
-                pass
+            with open(f'{hydra.core.hydra_config.HydraConfig.get().runtime.output_dir}/note.txt', 'w') as f:
+                f.write(cfg.note)
 
         # --- configを表示 ---
         # 現在の設定内容をコンソールに表示する。
-        # 交差検証の分割数に基づいて、ループの回数を設定する。
         print_config(cfg)
 
         # --- 交差検証使うか否か ---
@@ -134,10 +133,14 @@ def main(cfg: MyConfig) -> None:
             if cfg.data.use_kfold:
                 print(f"--- Fold {cfg.data.now_fold + 1}/{num} ---")
             # --- データの読み込み（DataLoader型） ---
-            train_loader, valid_loader, test_loader = load_data(cfg, cfg.data.now_fold)
+            train_loader, valid_loader, test_loader, train_shape = load_data(cfg, cfg.data.now_fold)
             
             # --- モデルと最適化関数、損失関数の読み込み ---
             model, optimizer, criterion = load_model(cfg, device, train_loader)
+
+            # --- モデルの概要を表示 ---
+            # モデルの詳細を表示する。torchinfo_summaryはモデルのパラメータ数や層の構成を表示する。
+            torchinfo_summary(cfg, model, train_shape)
 
             # --- 学習 ---
             model = train(cfg, device, model, optimizer, criterion, train_loader, valid_loader, test_loader, cfg.data.now_fold)
