@@ -139,8 +139,8 @@ def train(cfg: MyConfig,
                 log_dict = {}
                 for phase in cfg.data.data_splits:
                     log_dict[f"{phase}_loss"] = history[f"{phase}_loss"].hist[-1]
-                for metric in cfg.data.metrics:
-                    log_dict[f"{phase}_{metric}"] = history[f"{phase}_{metric}"].hist[-1]
+                    for metric in cfg.data.metrics:
+                        log_dict[f"{phase}_{metric}"] = history[f"{phase}_{metric}"].hist[-1]
                 log_dict.update({
                     "lr": optimizer.param_groups[0]['lr'],
                     "epoch": epoch
