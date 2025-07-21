@@ -323,7 +323,7 @@ class BaseDataset(Dataset):
         """
         標準化のための平均値と標準偏差を計算する関数。
         """
-        if self.cfg.data.standardize_type == "none" or not self.mode == "train":
+        if self.cfg.data.standardize_type is None or not self.mode == "train":
             return self.means, self.stds
 
         print("INFO: calculating means and stds... (in-memory mode)")
@@ -340,7 +340,7 @@ class BaseDataset(Dataset):
         """
         標準化のための平均値と標準偏差をオンライン（バッチ）で計算する関数。
         """
-        if self.cfg.data.standardize_type == "none" or not self.mode == "train":
+        if self.cfg.data.standardize_type is None or not self.mode == "train":
             return self.means, self.stds
         
         print("INFO: calculating means and stds... (memmap mode)")
@@ -392,7 +392,10 @@ class BaseDataset(Dataset):
         return mean, std
 
     def _standardize(self, X, means, stds):
-        return (X - means) / np.where(stds == 0, 1e-8, stds)  # stdsが0の要素を避けるために小さい値を使用
+        if self.cfg.data.standardize_type is None:
+            return X
+        else:
+            return (X - means) / np.where(stds == 0, 1e-8, stds)  # stdsが0の要素を避けるために小さい値を使用
 
     def _standardize_memmap(self, X, means, stds):
         batch_size = self.cfg.data.mmap_batch_size
