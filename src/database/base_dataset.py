@@ -525,9 +525,9 @@ class BaseDataset(Dataset):
         yの型を設定する関数。
         回帰問題の場合はfloat32、分類問題の場合はint64に変換する。
         """
-        if self.cfg.data.task_type == "regression":
+        if self.cfg.data.task_type == "regression" or self.cfg.model.output_size == 1:
             return y.astype(np.float32)
-        elif self.cfg.data.task_type == "classification":
+        elif self.cfg.data.task_type == "classification" and self.cfg.model.output_size > 1:
             return y.astype(np.int64)
         else:
             raise ValueError(f"Unknown task type: {self.cfg.data.task_type}")
