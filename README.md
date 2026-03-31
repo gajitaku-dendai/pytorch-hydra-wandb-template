@@ -105,8 +105,8 @@
 ## 事前準備  
 
 1. `pyenv` と `Poetry` のインストール
-インストール方法については、筆者が作成した以下の記事を読んでください。
-[pyenv × PoetryでPythonのパッケージ管理を効率化！（Windows / Linux 両対応・初心者歓迎）](https://qiita.com/gajitaku/items/c50b945725fcf8d75bb8)
+インストール方法については、以下が参考になります。
+[Windows で Python の開発環境を構築する（Poetry と pyenv を利用）]([https://qiita.com/gajitaku/items/c50b945725fcf8d75bb8](https://qiita.com/kerobot/items/8b371ba51501ddc806a7))
 
 2. W&Bへの新規登録
 [W&B公式サイト](https://wandb.ai/site/ja/)からアカウントを登録。
